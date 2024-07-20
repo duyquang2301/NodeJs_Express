@@ -1,14 +1,26 @@
 version: "3.8"
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  # app:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - .:/usr/src/app
+  #     - /usr/src/app/node_modules
+  #   environment:
+  #     - NODE_ENV=development
+  database:
+    image: postgres:15-alpine3.18
     ports:
-      - "3000:3000"
+      - "5432:5432"
     volumes:
-      - .:/usr/src/app
-      - /usr/src/app/node_modules
+      - backed-database:/var/lib/postgresql/data
+      - ./src/util/test/db-creation.sql:/docker-entrypoint-initdb.d/db-creation.sql
     environment:
-      - NODE_ENV=development
+      POSTGRES_USER: sct_admin
+      POSTGRES_PASSWORD: pAssw0rd
+volumes:
+  backed-database:

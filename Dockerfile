@@ -1,23 +1,25 @@
-# Sử dụng image Node.js chính thức
-FROM node:14
+#Build stage
+FROM --platform=linux/arm64 node:20-alpine3.17 AS build
 
-# Thiết lập thư mục làm việc trong container
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy file package.json và package-lock.json
-COPY package*.json ./
+COPY package*.json .
 
-# Cài đặt dependencies
 RUN npm install
 
-# Copy toàn bộ mã nguồn vào container
 COPY . .
 
-# Biên dịch TypeScript thành JavaScript
 RUN npm run build
 
-# Mở port ứng dụng
-EXPOSE 3000
+#Production stage
+FROM --platform=linux/arm64 node:20-alpine3.17
 
-# Lệnh để chạy ứng dụng
+WORKDIR /app
+
+COPY package*.json .
+
+RUN npm ci --only=production
+
+COPY --from=build /app/dist ./dist
+
 CMD ["node", "dist/index.js"]
